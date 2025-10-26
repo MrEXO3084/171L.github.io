@@ -1,0 +1,3652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>171L传媒 | 创意内容平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 变量定义 */
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --highlight: #e94560;
+            --gold: #ffd700;
+            --blue: #3498db;
+            --text: #f5f5f5;
+            --text-secondary: #b0b0b0;
+            --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --warning: #f39c12;
+            --radius: 10px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: url('./your-local-image.jpg') center/cover no-repeat fixed;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 备用背景 - 如果图片加载失败 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            z-index: -2;
+            display: none;
+        }
+
+        body.image-error::before {
+            display: block;
+        }
+
+        /* 调试信息 */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10000;
+            display: none;
+            max-width: 300px;
+        }
+
+        body.image-error .debug-info {
+            display: block;
+        }
+
+        /* 页面容器 */
+        .page {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            position: relative;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* 登录/注册页面 */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .login-container, .register-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 3rem;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            animation: fadeIn 0.5s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-header, .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo, .register-logo {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight);
+        }
+
+        .login-title, .register-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--highlight), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-subtitle, .register-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--highlight);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.3);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .forgot-password {
+            color: var(--highlight);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--highlight));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-guest {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-guest:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .auth-link {
+            color: var(--highlight);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+        }
+
+        .social-login {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* 头像上传样式 */
+        .avatar-upload {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid var(--highlight);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .avatar-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-preview i {
+            font-size: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .avatar-upload input {
+            display: none;
+        }
+
+        .avatar-upload label {
+            color: var(--highlight);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .avatar-upload label:hover {
+            text-decoration: underline;
+        }
+
+        /* 主页样式 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background: rgba(10, 10, 20, 0.75);
+            backdrop-filter: blur(15px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--highlight), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--highlight);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--highlight);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-avatar-nav {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .user-avatar-nav:hover {
+            border-color: var(--highlight);
+            transform: scale(1.1);
+        }
+
+        .user-avatar-nav img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 游客模式提示 */
+        .guest-notice {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border-left: 3px solid var(--warning);
+            margin-top: 80px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .guest-notice p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 英雄区域 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 5%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.4);
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--highlight);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .hero-visual {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.25) 0%, rgba(10, 10, 20, 0) 70%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .floating-card {
+            position: absolute;
+            width: 200px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow);
+            animation: float 6s ease-in-out infinite;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .floating-card:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-card:nth-child(2) {
+            top: 60%;
+            right: 20%;
+            animation-delay: 2s;
+        }
+
+        .floating-card:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--highlight);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* 内容区域 */
+        .section {
+            padding: 5rem 5%;
+            position: relative;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.6);
+            z-index: -1;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--highlight);
+        }
+
+        .social-platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .platform-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: var(--shadow);
+        }
+
+        .platform-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--highlight);
+        }
+
+        .platform-name {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .platform-stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 1.5rem 0;
+        }
+
+        .platform-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .platform-btn {
+            background: var(--accent);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .platform-btn:hover {
+            background: var(--highlight);
+            transform: translateY(-3px);
+        }
+
+        /* 留言墙样式 */
+        .message-wall {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .message-input {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            z-index: 1;
+        }
+
+        .message-input textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .message-input textarea:focus {
+            outline: none;
+            border-color: var(--highlight);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .message-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .message-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 1rem;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .verified-badge {
+            margin-left: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .blue-v {
+            color: var(--blue);
+        }
+
+        .gold-v {
+            color: var(--gold);
+        }
+
+        .gold-name {
+            color: var(--gold);
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .message-content {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            color: var(--highlight);
+        }
+
+        /* 举报按钮样式 */
+        .report-btn {
+            color: var(--error);
+        }
+
+        .report-btn:hover {
+            color: #c0392b;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            background: rgba(10, 10, 20, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 3rem 5%;
+            margin-top: 5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--highlight);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--highlight);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(20px);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: modalAppear 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalAppear {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* 个人资料模态框 */
+        .profile-avatar-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 3px solid var(--highlight);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar i {
+            font-size: 2.5rem;
+            color: var(--text-secondary);
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* 确认对话框样式 */
+        .confirm-content {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(20px);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: modalAppear 0.5s ease;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .confirm-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .confirm-message {
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* 公告模态框 */
+        .announcement-body {
+            padding: 2rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .announcement-text {
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            white-space: pre-line;
+        }
+
+        .announcement-text.editable {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            padding: 1rem;
+            min-height: 200px;
+            resize: vertical;
+            outline: none;
+        }
+
+        .announcement-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .announcement-edit-btn {
+            background: none;
+            border: none;
+            color: var(--highlight);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .announcement-edit-btn:hover {
+            color: var(--gold);
+        }
+
+        .announcement-edit-btn.hidden {
+            display: none;
+        }
+
+        /* 举报表单样式 */
+        .form-select, .form-textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--highlight);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.3);
+        }
+
+        /* 优化举报类型选择框样式 */
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e94560' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+            padding-right: 3rem;
+        }
+
+        .form-select option {
+            background-color: var(--secondary);
+            color: var(--text);
+            padding: 0.5rem;
+        }
+
+        .form-select:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* 通知和加载状态 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: var(--shadow);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: rgba(46, 204, 113, 0.9);
+        }
+
+        .notification.error {
+            background: rgba(231, 76, 60, 0.9);
+        }
+
+        .notification.warning {
+            background: rgba(243, 156, 18, 0.9);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn.loading {
+            pointer-events: none;
+        }
+
+        .btn.loading span {
+            visibility: hidden;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 3px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s ease infinite;
+        }
+
+        /* 表单验证样式 */
+        .form-group.error .form-input {
+            border-color: var(--error);
+        }
+
+        .form-group.success .form-input {
+            border-color: var(--success);
+        }
+
+        .form-error {
+            color: var(--error);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .form-group.error .form-error {
+            display: block;
+        }
+
+        /* 滚动按钮 */
+        .scroll-buttons {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .scroll-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .scroll-btn:hover {
+            background: var(--highlight);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .scroll-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .scroll-btn-top {
+            background: linear-gradient(135deg, var(--accent), var(--highlight));
+        }
+
+        .scroll-btn-bottom {
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+        }
+
+        /* 内容页面样式 */
+        .content-page {
+            padding: 100px 5% 5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .content-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .content-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .content-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--highlight);
+        }
+
+        .content-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .content-section {
+            margin-bottom: 3rem;
+        }
+
+        .content-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--highlight);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .content-section h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--highlight);
+            border-radius: 2px;
+        }
+
+        .content-section p {
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .content-section ul {
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-section li {
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .team-member {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .member-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid var(--highlight);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-avatar i {
+            font-size: 2.5rem;
+            color: var(--text-secondary);
+        }
+
+        .member-name {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .member-role {
+            color: var(--highlight);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .member-bio {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .contact-icon {
+            font-size: 2rem;
+            color: var(--highlight);
+            margin-bottom: 1rem;
+        }
+
+        .contact-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-detail {
+            color: var(--text-secondary);
+        }
+
+        /* 常见问题样式 */
+        .faq-body {
+            padding: 2rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .faq-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px);
+        }
+
+        .faq-question {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--highlight);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .faq-question i {
+            font-size: 1.2rem;
+        }
+
+        .faq-answer {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            padding-left: 2rem;
+        }
+
+        .faq-answer.editable {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            padding: 1rem;
+            min-height: 80px;
+            resize: vertical;
+            outline: none;
+        }
+
+        .faq-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .faq-edit-btn {
+            background: none;
+            border: none;
+            color: var(--highlight);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .faq-edit-btn:hover {
+            color: var(--gold);
+        }
+
+        .faq-edit-btn.hidden {
+            display: none;
+        }
+
+        .edit-btn-compact {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .edit-btn-compact:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .hero-visual {
+                display: none;
+            }
+            
+            .hero-content {
+                max-width: 100%;
+                text-align: center;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .social-stats {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem 5%;
+            }
+            
+            .nav-links {
+                margin: 1.5rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .login-container, .register-container {
+                padding: 2rem;
+            }
+            
+            .profile-actions {
+                flex-direction: column;
+            }
+            
+            .confirm-actions {
+                flex-direction: column;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+            }
+            
+            .announcement-actions, .faq-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .scroll-buttons {
+                right: 15px;
+                bottom: 15px;
+            }
+            
+            .scroll-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+
+            .content-page {
+                padding: 120px 5% 3rem;
+            }
+
+            .content-title {
+                font-size: 2rem;
+            }
+
+            .faq-question {
+                font-size: 1rem;
+            }
+            
+            .faq-answer {
+                padding-left: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scroll-buttons {
+                right: 10px;
+                bottom: 10px;
+            }
+            
+            .scroll-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .faq-item {
+                padding: 1rem;
+            }
+            
+            .faq-question {
+                font-size: 0.95rem;
+            }
+            
+            .faq-answer {
+                padding-left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 调试信息 -->
+    <div class="debug-info">
+        <strong>背景图片加载失败</strong><br>
+        请检查：<br>
+        1. 图片文件名：your-local-image.jpg<br>
+        2. 图片路径是否正确<br>
+        3. 图片格式是否支持
+    </div>
+
+    <!-- 通知区域 -->
+    <div class="notification" id="notification"></div>
+
+    <!-- 公告栏弹窗 -->
+    <div class="modal" id="announcementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">网站公告</h2>
+                <p class="register-subtitle">最新消息和重要通知</p>
+                <button class="announcement-edit-btn" id="closeAnnouncement">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="announcement-body">
+                <div class="announcement-text" id="announcementText" contenteditable="false">
+                    欢迎来到171L传媒官方互动站！我们会持续更新优质内容，敬请关注！
+
+                    【最新更新】留言举报功能优化
+                    - 优化了举报类型选择框的样式，使其更加直观易用
+                    - 调整了举报提示信息，统一显示"举报成功"
+                    - 保护管理员和创始人留言不被删除
+                    - 提升了整体用户体验
+
+                    感谢大家的支持与反馈！
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="announcement-actions">
+                    <button class="announcement-edit-btn" id="editAnnouncement">
+                        <i class="fas fa-edit"></i> 编辑公告
+                    </button>
+                    <button class="announcement-edit-btn hidden" id="saveAnnouncement">
+                        <i class="fas fa-save"></i> 保存公告
+                    </button>
+                    <button class="announcement-edit-btn hidden" id="cancelEdit">
+                        <i class="fas fa-times"></i> 取消编辑
+                    </button>
+                </div>
+                <button class="btn btn-primary" id="confirmAnnouncement">我知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 常见问题弹窗 -->
+    <div class="modal" id="faqModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">网站常见问题列表及解决</h2>
+                <p class="register-subtitle">常见问题解答与使用指南</p>
+                <button class="announcement-edit-btn" id="closeFaq">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="faq-body">
+                <ul class="faq-list" id="faqList">
+                    <!-- 常见问题将动态生成 -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <div class="faq-actions">
+                    <button class="faq-edit-btn hidden" id="saveFaq">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <button class="faq-edit-btn hidden" id="cancelFaqEdit">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button class="faq-edit-btn edit-btn-compact" id="editFaq">
+                        <i class="fas fa-edit"></i> 编辑
+                    </button>
+                </div>
+                <button class="btn btn-primary" id="confirmFaq">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 举报留言模态框 -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">举报留言</h2>
+                <p class="register-subtitle">请选择举报类型并填写举报原因</p>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    <div class="form-group">
+                        <label class="form-label" for="reportType">举报类型</label>
+                        <select id="reportType" class="form-select">
+                            <option value="" disabled selected>请选择举报类型</option>
+                            <option value="spam">垃圾广告</option>
+                            <option value="harassment">骚扰或人身攻击</option>
+                            <option value="inappropriate">不当内容</option>
+                            <option value="privacy">侵犯隐私</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reportDescription">举报描述</label>
+                        <textarea id="reportDescription" class="form-textarea" placeholder="请详细描述举报原因..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                            <i class="fas fa-info-circle"></i> 请至少填写一项举报信息
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelReport">取消</button>
+                <button class="btn btn-primary" id="submitReport">提交举报</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于我们页面 -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">关于171L传媒</h2>
+                <p class="register-subtitle">我们的故事与使命</p>
+                <button class="announcement-edit-btn" id="closeAbout">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="content-section">
+                    <h2>我们的故事</h2>
+                    <p>171L传媒成立于2024年，最初是一个专注于创意短视频制作的小团队。经过多年的发展，我们已经成长为拥有多个社交媒体平台账号、覆盖数百万粉丝的综合性内容创作机构。</p>
+                    <p>我们的名字"171L"代表着我们的核心理念：1个团队，7天持续创作，1份热爱。我们相信，优质的内容能够连接人与人，传递正能量，创造价值。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>我们的使命</h2>
+                    <p>我们的使命是通过创意内容连接世界，为年轻人提供有价值、有温度、有创意的数字内容体验。我们致力于：</p>
+                    <ul>
+                        <li>创作高质量、多元化的数字内容</li>
+                        <li>建立积极、健康的网络社区环境</li>
+                        <li>培养新一代内容创作者的创作能力</li>
+                    </ul>
+                </div>
+                
+                <div class="content-section">
+                    <h2>我们的团队</h2>
+                    <p>我们拥有一支充满激情和创造力的团队，成员来自内容创作、设计、技术和运营等多个领域。</p>
+                    <div class="team-grid">
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3 class="member-name">MQR</h3>
+                            <p class="member-role">创始人 & CEO & 站长</p>
+                            <p class="member-bio">资深内容创作者，拥有8年媒体行业经验。</p>
+                        </div>
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3 class="member-name">MQR</h3>
+                            <p class="member-role">内容总监</p>
+                            <p class="member-bio">负责内容策划与质量把控，擅长将创意转化为引人入胜的故事。</p>
+                        </div>
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h3 class="member-name">MQR</h3>
+                            <p class="member-role">技术负责人</p>
+                            <p class="member-bio">负责平台技术开发与维护，确保用户体验流畅稳定。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-section">
+                    <h2>联系我们</h2>
+                    <p>如果您有任何问题、建议或合作意向，欢迎通过以下方式联系我们：</p>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h3 class="contact-title">邮箱</h3>
+                            <p class="contact-detail">m15265714588@163.com</p>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <h3 class="contact-title">电话</h3>
+                            <p class="contact-detail">（暂未定）</p>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h3 class="contact-title">地址</h3>
+                            <p class="contact-detail">（暂未定）</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="confirmAbout">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 社区指南页面 -->
+    <div class="modal" id="communityGuidelinesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">社区指南</h2>
+                <p class="register-subtitle">共建和谐社区环境</p>
+                <button class="announcement-edit-btn" id="closeCommunityGuidelines">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="content-section">
+                    <h2>欢迎加入171L传媒社区</h2>
+                    <p>感谢您选择加入171L传媒社区！为了维护一个积极、健康、有益的社区环境，我们制定了以下社区指南，请您仔细阅读并遵守。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>基本准则</h2>
+                    <p>在我们的社区中，我们期望所有成员：</p>
+                    <ul>
+                        <li><strong>尊重他人</strong> - 尊重所有社区成员的观点、背景和身份</li>
+                        <li><strong>文明交流</strong> - 使用礼貌、友善的语言进行沟通</li>
+                        <li><strong>保护隐私</strong> - 不泄露自己或他人的隐私信息</li>
+                        <li><strong>遵守法律法规</strong> - 所有行为必须符合国家法律法规</li>
+                    </ul>
+                </div>
+                
+                <div class="content-section">
+                    <h2>禁止行为</h2>
+                    <p>为确保社区环境的安全与和谐，以下行为在社区中严格禁止：</p>
+                    <ul>
+                        <li>发布任何形式的仇恨言论、歧视性内容或人身攻击</li>
+                        <li>传播虚假信息、谣言或误导性内容</li>
+                        <li>发布色情、暴力或其他不适宜的内容</li>
+                        <li>进行骚扰、欺凌或威胁其他社区成员</li>
+                        <li>发布垃圾广告、推广信息或进行商业营销</li>
+                        <li>侵犯他人知识产权，包括但不限于盗用图片、文字、视频等</li>
+                        <li>尝试破坏社区安全或进行黑客行为</li>
+                    </ul>
+                </div>
+                
+                <div class="content-section">
+                    <h2>内容发布规范</h2>
+                    <p>在发布内容时，请确保：</p>
+                    <ul>
+                        <li>原创内容请注明，转载内容需获得授权并注明出处</li>
+                        <li>图片、视频等内容清晰正常，不含有不良信息</li>
+                        <li>不发布涉及政治、宗教等敏感话题的内容</li>
+                        <li>商业推广内容需事先获得管理员批准</li>
+                    </ul>
+                </div>
+                
+                <div class="content-section">
+                    <h2>违规处理</h2>
+                    <p>对于违反社区指南的行为，我们将根据情节严重程度采取相应措施：</p>
+                    <ul>
+                        <li><strong>警告</strong> - 轻微违规行为将收到警告通知</li>
+                        <li><strong>内容删除</strong> - 违规内容将被删除</li>
+                        <li><strong>临时禁言</strong> - 多次违规或中等程度违规将面临1-30天不等的禁言处罚</li>
+                        <li><strong>永久封禁</strong> - 严重违规或屡教不改者将被永久封禁账号</li>
+                    </ul>
+                    <p>如果您发现任何违规行为，欢迎通过举报功能或联系管理员向我们反馈。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>社区奖励</h2>
+                    <p>我们鼓励积极、有建设性的社区参与，优秀成员将获得：</p>
+                    <ul>
+                        <li>内容推荐和曝光机会</li>
+                        <li>社区荣誉称号和特殊标识</li>
+                        <li>参与社区活动和专属福利的资格</li>
+                        <li>与171L传媒团队直接交流的机会</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="confirmCommunityGuidelines">我已阅读并同意</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助中心页面 -->
+    <div class="modal" id="helpCenterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">帮助中心</h2>
+                <p class="register-subtitle">全方位支持与解决方案</p>
+                <button class="announcement-edit-btn" id="closeHelpCenter">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="content-section">
+                    <h2>欢迎使用帮助中心</h2>
+                    <p>我们为您提供全方位的使用支持和问题解决方案。如果您在使用过程中遇到任何问题，请先查阅以下内容，大多数问题都能在这里找到答案。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>账号与登录</h2>
+                    <p><strong>如何注册账号？</strong></p>
+                    <p>点击网站右上角的"注册"按钮，填写用户名、昵称和密码即可完成注册。注册后您可以上传头像，完善个人资料。</p>
+                    
+                    <p><strong>忘记密码怎么办？</strong></p>
+                    <p>目前网站暂不支持密码找回功能，请确保妥善保管您的密码。如有需要，可以联系客服寻求帮助。</p>
+                    
+                    <p><strong>如何修改个人资料？</strong></p>
+                    <p>登录后点击右上角的用户头像，进入个人资料页面即可修改昵称、密码和头像。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>内容与功能</h2>
+                    <p><strong>如何发布留言？</strong></p>
+                    <p>在留言墙区域，登录后即可在输入框中撰写留言内容，点击"发布留言"按钮即可发布。游客模式下无法发布留言。</p>
+                    
+                    <p><strong>如何举报不当留言？</strong></p>
+                    <p>在每个留言卡片的底部有举报按钮，点击后选择举报类型并填写举报原因即可。我们会及时处理您的举报。</p>
+                    
+                    <p><strong>为什么我无法查看某些内容？</strong></p>
+                    <p>部分内容可能需要登录后才能查看。如果您已登录但仍无法查看，可能是内容已被删除或代码问题和限制。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>社区与互动</h2>
+                    <p><strong>如何参与社区讨论？</strong></p>
+                    <p>您可以在留言墙发布留言，与其他用户互动。请遵守社区指南，保持文明交流。</p>
+                    
+                    <p><strong>如何举报不当内容或行为？</strong></p>
+                    <p>如果您发现任何违规内容或行为，可以点击内容旁边的举报按钮，或直接联系管理员。</p>
+                    
+                    <p><strong>如何成为社区优秀成员？</strong></p>
+                    <p>积极参与社区互动，发布有价值的内容，帮助其他用户，都有机会成为社区优秀成员并获得特殊奖励。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>技术问题</h2>
+                    <p><strong>网站加载缓慢怎么办？</strong></p>
+                    <p>一般是我的代码问题，可以刷新网页试试、重启浏览器或把浏览器窗口缩小。（我也不知道问题所在）</p>
+                    
+                    <p><strong>页面显示异常怎么办？</strong></p>
+                    <p>有可能是我的代码问题，但一般刷新网页可以解决。如果问题仍然存在，请联系技术支持或抖音人工客服。</p>
+                    
+                    <p><strong>如何联系技术支持？</strong></p>
+                    <p>您可以通过页脚的联系方式或发送邮件至m15265714588@163.com联系我们。</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>隐私与安全</h2>
+                    <p><strong>我的个人信息安全吗？</strong></p>
+                    <p>我们高度重视用户隐私和安全，采取多种措施保护您的个人信息。详细信息请参阅我们的隐私政策。</p>
+                    
+                    <p><strong>如何保护我的账号安全？</strong></p>
+                    <p>请使用强密码，不要与他人共享账号信息，定期修改密码。如果发现异常活动，请立即联系我们。</p>
+                    
+                    <p><strong>我的内容会被如何使用？</strong></p>
+                    <p>您发布的内容版权归您所有，但我们有权在平台内展示和推广。详细条款请参阅用户协议。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="confirmHelpCenter">关闭</button>
+                <button class="btn btn-secondary" id="contactSupport">联系客服</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一键回到顶部/底部按钮 -->
+    <div class="scroll-buttons" id="scrollButtons">
+        <button class="scroll-btn scroll-btn-top" id="scrollToTop" title="回到顶部">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        <button class="scroll-btn scroll-btn-bottom" id="scrollToBottom" title="回到底部">
+            <i class="fas fa-arrow-down"></i>
+        </button>
+    </div>
+
+    <!-- 登录页面 -->
+    <div id="login-page" class="page active">
+        <div class="auth-container">
+            <div class="login-container">
+                <div class="login-header">
+                    <div class="login-logo">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h1 class="login-title">用户登录</h1>
+                    <p class="login-subtitle">欢迎回到171L传媒</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="username">用户名</label>
+                        <input type="text" id="username" class="form-input" placeholder="请输入用户名" required>
+                        <div class="form-error" id="username-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">密码</label>
+                        <input type="password" id="password" class="form-input" placeholder="请输入密码" required>
+                        <div class="form-error" id="password-error"></div>
+                    </div>
+                    <div class="form-options">
+                        <div class="remember-me">
+                            <input type="checkbox" id="remember">
+                            <label for="remember">记住密码</label>
+                        </div>
+                        <a href="#" class="forgot-password">忘记密码？</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span>登录</span>
+                    </button>
+                </form>
+
+                <button class="btn btn-guest" id="guestLogin">
+                    <span>游客登录</span>
+                </button>
+
+                <div class="auth-footer">
+                    <p>没有用户？</p>
+                    <div class="auth-links">
+                        <a href="#" class="auth-link" id="showRegister">注册用户</a>
+                        <span>|</span>
+                        <a href="#" class="auth-link" id="showLogin">返回</a>
+                    </div>
+                </div>
+
+                <div class="divider">
+                    <span>或使用</span>
+                </div>
+
+                <div class="social-login">
+                    <button class="social-btn">
+                        <i class="fab fa-weixin"></i>
+                    </button>
+                    <button class="social-btn">
+                        <i class="fab fa-qq"></i>
+                    </button>
+                    <button class="social-btn">
+                        <i class="fab fa-weibo"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册页面 -->
+    <div id="register-page" class="page">
+        <div class="auth-container">
+            <div class="register-container">
+                <div class="register-header">
+                    <div class="register-logo">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h1 class="register-title">用户注册</h1>
+                    <p class="register-subtitle">加入171L传媒社区</p>
+                </div>
+
+                <form id="registerForm">
+                    <div class="avatar-upload">
+                        <div class="avatar-preview" id="avatarPreview">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <input type="file" id="avatarUpload" accept="image/*">
+                        <label for="avatarUpload">上传头像</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regUsername">用户名</label>
+                        <input type="text" id="regUsername" class="form-input" placeholder="请输入用户名" required>
+                        <div class="form-error" id="regUsername-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regNickname">昵称</label>
+                        <input type="text" id="regNickname" class="form-input" placeholder="请输入昵称" required>
+                        <div class="form-error" id="regNickname-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="regPassword">密码</label>
+                        <input type="password" id="regPassword" class="form-input" placeholder="请输入密码" required>
+                        <div class="form-error" id="regPassword-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">确认密码</label>
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="请再次输入密码" required>
+                        <div class="form-error" id="confirmPassword-error"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span>注册</span>
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>已有账号？</p>
+                    <div class="auth-links">
+                        <a href="#" class="auth-link" id="showLoginFromReg">立即登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主网站内容 -->
+    <div id="main-website" class="page">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-star"></i>
+                <span>171L传媒</span>
+            </div>
+            <div class="nav-links">
+                <a href="#home">首页</a>
+                <a href="#about">关于</a>
+                <a href="#social">社交媒体</a>
+                <a href="#community">社区</a>
+                <a href="#" id="showAnnouncement">公告</a>
+                <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="social-link">联系</a>
+            </div>
+            <div class="auth-buttons">
+                <div class="user-avatar-nav" id="userAvatarNav">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 游客模式提示 -->
+        <div class="guest-notice" id="guestNotice" style="display: none;">
+            <p><i class="fas fa-info-circle"></i> 您当前处于游客模式，部分功能受限。请<a href="#" id="loginFromGuest" style="color: var(--highlight);">登录</a>或<a href="#" id="registerFromGuest" style="color: var(--highlight);">注册</a>以解锁完整功能。</p>
+        </div>
+
+        <!-- 英雄区域 -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <h1>探索创意宇宙<br>连接无限可能</h1>
+                <p>欢迎来到171L传媒官方互动站，这里汇聚了我们在抖音、B站等平台的精彩内容，以及一个充满活力的创作者社区。</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary">探索内容</button>
+                    <a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="btn btn-secondary social-link" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">加入社区</a>
+                </div>
+                <div class="social-stats">
+                    <div class="stat">
+                        <div class="stat-value">150K+</div>
+                        <div class="stat-label">抖音粉丝</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">80K+</div>
+                        <div class="stat-label">B站粉丝</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">5K+</div>
+                        <div class="stat-label">社区成员</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-card">
+                    <div class="card-icon">
+                        <i class="fab fa-tiktok"></i>
+                    </div>
+                    <div>热门视频</div>
+                </div>
+                <div class="floating-card">
+                    <div class="card-icon">
+                        <i class="fab fa-bilibili"></i>
+                    </div>
+                    <div>最新投稿</div>
+                </div>
+                <div class="floating-card">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>社区动态</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 社交媒体区域 -->
+        <section class="section" id="social">
+            <h2 class="section-title">社交媒体平台</h2>
+            <div class="social-platforms">
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fab fa-tiktok"></i>
+                    </div>
+                    <h3 class="platform-name">抖音</h3>
+                    <p>每日更新创意短视频，分享生活点滴与专业知识</p>
+                    <div class="platform-stats">
+                        <div class="platform-stat">
+                            <div class="stat-value">150K+</div>
+                            <div class="stat-label">粉丝</div>
+                        </div>
+                        <div class="platform-stat">
+                            <div class="stat-value">320</div>
+                            <div class="stat-label">作品</div>
+                        </div>
+                        <div class="platform-stat">
+                            <div class="stat-value">2.1M</div>
+                            <div class="stat-label">点赞</div>
+                        </div>
+                    </div>
+                    <a href="https://www.douyin.com/user/self?from_tab_name=main" class="platform-btn social-link" target="_blank">关注我们</a>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fab fa-bilibili"></i>
+                    </div>
+                    <h3 class="platform-name">Bilibili</h3>
+                    <p>深度内容创作，教程分享与社区互动</p>
+                    <div class="platform-stats">
+                        <div class="platform-stat">
+                            <div class="stat-value">80K+</div>
+                            <div class="stat-label">粉丝</div>
+                        </div>
+                        <div class="platform-stat">
+                            <div class="stat-value">45</div>
+                            <div class="stat-label">视频</div>
+                        </div>
+                        <div class="platform-stat">
+                            <div class="stat-value">580K</div>
+                            <div class="stat-label">播放</div>
+                        </div>
+                    </div>
+                    <a href="https://space.bilibili.com/3493127316835138?spm_id_from=333.1007.0.0" class="platform-btn social-link" target="_blank">关注我们</a>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="platform-name">官方网站</h3>
+                    <p>最新资讯、独家内容与社区互动平台</p>
+                    <div class="platform-stats">
+                        <div class="platform-stat">
+                            <div class="stat-value">5K+</div>
+                            <div class="stat-label">会员</div>
+                        </div>
+                        <div class="platform-stat">
+                            <div class="stat-value">1.2K</div>
+                            <div class="stat-label">留言</div>
+                        </div>
+                        <div class="platform-stat">
+                            <div class="stat-value">98</div>
+                            <div class="stat-label">活动</div>
+                        </div>
+                    </div>
+                    <a href="#" class="platform-btn">探索更多</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 留言墙 -->
+        <section class="section" id="community">
+            <h2 class="section-title">过客留言墙</h2>
+            
+            <!-- 留言输入区域 -->
+            <div class="message-input" id="messageInput">
+                <textarea id="messageText" placeholder="写下您的留言..."></textarea>
+                <button class="btn btn-primary" id="submitMessage">发布留言</button>
+            </div>
+            
+            <div class="message-wall" id="messageWall">
+                <!-- 留言将动态生成 -->
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于我们</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" id="showAbout">品牌故事</a></li>
+                        <li><a href="#" id="showTeam">团队介绍</a></li>
+                        <li><a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="social-link">加入我们</a></li>
+                        <li><a href="#" id="showContact">联系方式</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>社交媒体</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="social-link">抖音</a></li>
+                        <li><a href="https://space.bilibili.com/3493127316835138?spm_id_from=333.1007.0.0" target="_blank" class="social-link">Bilibili</a></li>
+                        <li><a href="#" class="social-link">（暂未定）</a></li>
+                        <li><a href="#" class="social-link">（暂未定）</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>社区指南</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" id="showCommunityGuidelines">社区规则</a></li>
+                        <li><a href="#" id="showContentGuidelines">内容指南</a></li>
+                        <li><a href="#" id="showPrivacyPolicy">隐私政策</a></li>
+                        <li><a href="#" id="showTerms">使用条款</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>帮助中心</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" id="showFaq">常见问题</a></li>
+                        <li><a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="social-link">用户反馈</a></li>
+                        <li><a href="#" id="showTechSupport">技术支持</a></li>
+                        <li><a href="https://www.douyin.com/user/self?from_tab_name=main" target="_blank" class="social-link">联系客服</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025-2030| 171L传媒 版权所有 | </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 个人资料页面 -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">个人资料</h2>
+                <p>管理您的账户信息</p>
+            </div>
+            <div class="modal-body">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar" id="profileAvatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input type="file" id="profileAvatarUpload" accept="image/*">
+                    <label for="profileAvatarUpload">更换头像</label>
+                </div>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label class="form-label" for="profileNickname">昵称</label>
+                        <input type="text" id="profileNickname" class="form-input" placeholder="请输入昵称">
+                        <div class="form-error" id="profileNickname-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="profileUsername">用户名</label>
+                        <input type="text" id="profileUsername" class="form-input" placeholder="请输入用户名" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="profilePassword">新密码</label>
+                        <input type="password" id="profilePassword" class="form-input" placeholder="请输入新密码（留空则不修改）">
+                        <div class="form-error" id="profilePassword-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="profileConfirmPassword">确认新密码</label>
+                        <input type="password" id="profileConfirmPassword" class="form-input" placeholder="请再次输入新密码">
+                        <div class="form-error" id="profileConfirmPassword-error"></div>
+                    </div>
+                    <div class="profile-actions">
+                        <button type="submit" class="btn btn-primary">保存更改</button>
+                        <button type="button" class="btn btn-danger" id="logoutBtn">退出登录</button>
+                        <button type="button" class="btn btn-cancel" id="closeProfile">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 退出登录确认对话框 -->
+    <div class="modal" id="logoutConfirmModal">
+        <div class="confirm-content">
+            <h3 class="confirm-title">确认退出</h3>
+            <p class="confirm-message">此操作会退出您的账号，确定要继续吗？</p>
+            <div class="confirm-actions">
+                <button class="btn btn-danger" id="confirmLogout">确认退出</button>
+                <button class="btn btn-cancel" id="cancelLogout">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 社交链接限制提示 -->
+    <div class="modal" id="restrictedModal">
+        <div class="confirm-content">
+            <div class="restricted-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h3 class="restricted-title">功能受限</h3>
+            <p class="restricted-message">请登陆后再找我们玩吧~(￣▽￣)~*</p>
+            <div class="confirm-actions">
+                <button class="btn btn-primary" id="closeRestricted">本公主知道了</button>
+                <button class="btn btn-secondary" id="loginFromRestricted">公主请登录</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 应用初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 图片加载检测
+            const testImage = new Image();
+            const imagePath = './your-local-image.jpg';
+            testImage.src = imagePath;
+            
+            testImage.onload = function() {
+                console.log('✅ 背景图片加载成功:', imagePath);
+                document.body.classList.remove('image-error');
+            };
+            
+            testImage.onerror = function() {
+                console.log('❌ 背景图片加载失败:', imagePath);
+                document.body.classList.add('image-error');
+            };
+
+            // 应用实例化
+            const app = new App();
+            app.init();
+        });
+
+        // 应用类
+        class App {
+            constructor() {
+                this.currentUser = null;
+                this.users = JSON.parse(localStorage.getItem('users')) || [];
+                this.messages = JSON.parse(localStorage.getItem('messages')) || [];
+                this.isGuestMode = false;
+                this.announcement = localStorage.getItem('announcement') || "欢迎来到171L传媒官方互动站！我们会持续更新优质内容，敬请关注！\n\n【最新更新】留言举报功能优化\n- 优化了举报类型选择框的样式，使其更加直观易用\n- 调整了举报提示信息，统一显示\"举报成功\"\n- 保护管理员和创始人留言不被删除\n- 提升了整体用户体验\n\n感谢大家的支持与反馈！";
+                this.faqData = JSON.parse(localStorage.getItem('faqData')) || [
+                    {
+                        question: "如何注册账号？",
+                        answer: "点击网站右上角的'注册'按钮，填写用户名、昵称和密码即可完成注册。"
+                    },
+                    {
+                        question: "忘记密码怎么办？",
+                        answer: "目前网站暂不支持密码找回功能，请确保妥善保管您的密码。如有需要，可以联系客服寻求帮助。"
+                    },
+                    {
+                        question: "如何修改个人资料？",
+                        answer: "登录后点击右上角的用户头像，进入个人资料页面即可修改昵称、密码和头像。"
+                    },
+                    {
+                        question: "为什么无法发布留言？",
+                        answer: "请确保您已登录账号。游客模式下无法发布留言，需要登录后才能使用留言功能。"
+                    },
+                    {
+                        question: "如何举报不当留言？",
+                        answer: "在每个留言卡片的底部有举报按钮，点击后选择举报类型并填写举报原因即可。我们会及时处理您的举报。"
+                    }
+                ];
+                this.reportingMessageId = null; // 当前正在举报的留言ID
+            }
+
+            init() {
+                this.bindEvents();
+                this.cleanupData(); // 数据清理
+                this.checkLoginStatus();
+                this.initializeMessages();
+                this.renderFaq();
+                
+                // 添加示例数据
+                if (this.messages.length === 0) {
+                    this.addSampleMessages();
+                }
+            }
+
+            // 数据清理方法
+            cleanupData() {
+                // 清理无效的用户数据
+                this.users = this.users.filter(user => 
+                    user && user.username && user.nickname && user.password
+                );
+                
+                // 清理无效的留言数据
+                this.messages = this.messages.filter(message => 
+                    message && message.id && message.userId && message.nickname && message.content
+                );
+                
+                // 保存清理后的数据
+                localStorage.setItem('users', JSON.stringify(this.users));
+                localStorage.setItem('messages', JSON.stringify(this.messages));
+                
+                console.log('数据清理完成:', {
+                    users: this.users.length,
+                    messages: this.messages.length
+                });
+            }
+
+            // 事件绑定
+            bindEvents() {
+                // 登录注册切换
+                document.getElementById('showRegister').addEventListener('click', (e) => this.showPage(e, 'register-page'));
+                document.getElementById('showLoginFromReg').addEventListener('click', (e) => this.showPage(e, 'login-page'));
+                document.getElementById('showLogin').addEventListener('click', (e) => this.showPage(e, 'login-page'));
+
+                // 表单提交
+                document.getElementById('registerForm').addEventListener('submit', (e) => this.handleRegister(e));
+                document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
+                document.getElementById('profileForm').addEventListener('submit', (e) => this.handleProfileUpdate(e));
+
+                // 头像上传
+                document.getElementById('avatarUpload').addEventListener('change', (e) => this.handleAvatarUpload(e, document.getElementById('avatarPreview')));
+                document.getElementById('profileAvatarUpload').addEventListener('change', (e) => this.handleAvatarUpload(e, document.getElementById('profileAvatar')));
+
+                // 游客登录
+                document.getElementById('guestLogin').addEventListener('click', () => this.guestLogin());
+                document.getElementById('loginFromGuest').addEventListener('click', (e) => this.showPage(e, 'login-page'));
+                document.getElementById('registerFromGuest').addEventListener('click', (e) => this.showPage(e, 'register-page'));
+
+                // 社交链接处理
+                document.addEventListener('click', (e) => this.handleSocialLinks(e));
+
+                // 个人资料
+                document.getElementById('userAvatarNav').addEventListener('click', () => this.showProfile());
+                document.getElementById('closeProfile').addEventListener('click', () => this.hideProfile());
+                document.getElementById('logoutBtn').addEventListener('click', () => this.confirmLogout());
+                document.getElementById('confirmLogout').addEventListener('click', () => this.logout());
+                document.getElementById('cancelLogout').addEventListener('click', () => this.cancelLogout());
+
+                // 留言功能
+                document.getElementById('submitMessage').addEventListener('click', () => this.submitMessage());
+
+                // 举报功能相关事件
+                document.getElementById('cancelReport').addEventListener('click', () => this.hideReportModal());
+                document.getElementById('submitReport').addEventListener('click', () => this.submitReport());
+
+                // 公告功能
+                document.getElementById('closeAnnouncement').addEventListener('click', () => this.hideAnnouncementModal());
+                document.getElementById('confirmAnnouncement').addEventListener('click', () => this.hideAnnouncementModal());
+                document.getElementById('showAnnouncement').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showAnnouncementModal();
+                });
+                document.getElementById('editAnnouncement').addEventListener('click', () => this.enterEditMode());
+                document.getElementById('saveAnnouncement').addEventListener('click', () => this.saveAnnouncementContent());
+                document.getElementById('cancelEdit').addEventListener('click', () => this.exitEditMode());
+
+                // 常见问题功能
+                document.getElementById('closeFaq').addEventListener('click', () => this.hideFaqModal());
+                document.getElementById('confirmFaq').addEventListener('click', () => this.hideFaqModal());
+                document.getElementById('showFaq').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showFaqModal();
+                });
+                document.getElementById('editFaq').addEventListener('click', () => this.enterFaqEditMode());
+                document.getElementById('saveFaq').addEventListener('click', () => this.saveFaqContent());
+                document.getElementById('cancelFaqEdit').addEventListener('click', () => this.exitFaqEditMode());
+
+                // 关于我们功能
+                document.getElementById('showAbout').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showAboutModal();
+                });
+                document.getElementById('closeAbout').addEventListener('click', () => this.hideAboutModal());
+                document.getElementById('confirmAbout').addEventListener('click', () => this.hideAboutModal());
+
+                // 社区指南功能
+                document.getElementById('showCommunityGuidelines').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showCommunityGuidelinesModal();
+                });
+                document.getElementById('closeCommunityGuidelines').addEventListener('click', () => this.hideCommunityGuidelinesModal());
+                document.getElementById('confirmCommunityGuidelines').addEventListener('click', () => this.hideCommunityGuidelinesModal());
+
+                // 帮助中心功能
+                document.getElementById('showTechSupport').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showHelpCenterModal();
+                });
+                document.getElementById('closeHelpCenter').addEventListener('click', () => this.hideHelpCenterModal());
+                document.getElementById('confirmHelpCenter').addEventListener('click', () => this.hideHelpCenterModal());
+                document.getElementById('contactSupport').addEventListener('click', () => this.contactSupport());
+
+                // 其他页脚链接
+                document.getElementById('showTeam').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showAboutModal();
+                });
+                document.getElementById('showContact').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showAboutModal();
+                });
+                document.getElementById('showContentGuidelines').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showCommunityGuidelinesModal();
+                });
+                document.getElementById('showPrivacyPolicy').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showCommunityGuidelinesModal();
+                });
+                document.getElementById('showTerms').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showCommunityGuidelinesModal();
+                });
+
+                // 滚动按钮
+                document.getElementById('scrollToTop').addEventListener('click', () => this.scrollToTop());
+                document.getElementById('scrollToBottom').addEventListener('click', () => this.scrollToBottom());
+
+                // 限制提示
+                document.getElementById('closeRestricted').addEventListener('click', () => this.closeRestrictedModal());
+                document.getElementById('loginFromRestricted').addEventListener('click', () => this.loginFromRestrictedModal());
+
+                // 模态框外部点击关闭
+                window.addEventListener('click', (e) => this.handleModalClicks(e));
+
+                // 平滑滚动
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', (e) => this.handleSmoothScroll(e));
+                });
+
+                // 输入框实时验证
+                document.querySelectorAll('.form-input').forEach(input => {
+                    input.addEventListener('blur', (e) => this.handleInputValidation(e));
+                });
+            }
+
+            // 检查登录状态
+            checkLoginStatus() {
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    try {
+                        this.currentUser = JSON.parse(savedUser);
+                        this.updateNavigation();
+                        this.showPage(null, 'main-website');
+                        
+                        // 更新公告权限
+                        this.updateAnnouncementPermissions();
+                        this.updateFaqPermissions();
+                        
+                        // 显示公告
+                        setTimeout(() => {
+                            this.showAnnouncementModal();
+                        }, 500);
+                    } catch (error) {
+                        console.error('解析用户数据失败:', error);
+                        localStorage.removeItem('currentUser');
+                    }
+                } else {
+                    // 未登录时隐藏留言输入框
+                    document.getElementById('messageInput').style.display = 'none';
+                }
+                
+                // 渲染留言
+                this.renderMessages();
+            }
+
+            // 显示页面
+            showPage(e, pageId) {
+                if (e) e.preventDefault();
+                
+                // 隐藏所有页面
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                // 显示目标页面
+                document.getElementById(pageId).classList.add('active');
+            }
+
+            // 添加示例留言
+            addSampleMessages() {
+                this.messages = [
+                    {
+                        id: 1,
+                        userId: "admin",
+                        nickname: "平台管理员",
+                        avatar: null,
+                        content: "欢迎大家来到171L传媒社区！我们会持续更新优质内容，敬请关注！",
+                        time: new Date(Date.now() - 86400000).toISOString(),
+                        likes: 42
+                    },
+                    {
+                        id: 2,
+                        userId: "founder",
+                        nickname: "站长",
+                        avatar: null,
+                        content: "感谢大家的支持！我们会继续努力，为大家带来更多精彩内容！",
+                        time: new Date(Date.now() - 172800000).toISOString(),
+                        likes: 38
+                    },
+                    {
+                        id: 3,
+                        userId: "user123",
+                        nickname: "老吃家",
+                        avatar: null,
+                        content: "内容质量真的很高，每次更新都能学到新东西！站长也很紧实，下次还来。",
+                        time: new Date(Date.now() - 259200000).toISOString(),
+                        likes: 28
+                    },
+                    {
+                        id: 4,
+                        userId: "spamuser",
+                        nickname: "广告哥",
+                        avatar: null,
+                        content: "专业代刷粉丝，点赞，评论，私信获取优惠！",
+                        time: new Date(Date.now() - 3600000).toISOString(),
+                        likes: 0
+                    }
+                ];
+                localStorage.setItem('messages', JSON.stringify(this.messages));
+            }
+
+            // 显示通知
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type} show`;
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // 设置按钮加载状态
+            setButtonLoading(button, isLoading) {
+                if (isLoading) {
+                    button.classList.add('loading');
+                    button.disabled = true;
+                } else {
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                }
+            }
+
+            // 表单验证
+            validateForm(formData) {
+                const errors = {};
+                
+                // 用户名验证
+                if (formData.username && formData.username.length < 3) {
+                    errors.username = '用户名至少需要3个字符';
+                }
+                
+                // 昵称验证
+                if (formData.nickname && formData.nickname.length < 2) {
+                    errors.nickname = '昵称至少需要2个字符';
+                }
+                
+                // 密码验证
+                if (formData.password && formData.password.length < 6) {
+                    errors.password = '密码至少需要6个字符';
+                }
+                
+                // 确认密码验证
+                if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+                    errors.confirmPassword = '密码不一致';
+                }
+                
+                return errors;
+            }
+
+            // 显示表单错误
+            showFormErrors(formId, errors) {
+                // 清除所有错误状态
+                const formGroups = document.querySelectorAll(`#${formId} .form-group`);
+                formGroups.forEach(group => {
+                    group.classList.remove('error', 'success');
+                });
+                
+                // 显示错误
+                Object.keys(errors).forEach(field => {
+                    const errorElement = document.getElementById(`${field}-error`);
+                    const formGroup = errorElement ? errorElement.closest('.form-group') : null;
+                    
+                    if (errorElement && formGroup) {
+                        errorElement.textContent = errors[field];
+                        formGroup.classList.add('error');
+                    }
+                });
+            }
+
+            // 渲染留言墙
+            renderMessages() {
+                const messageWall = document.getElementById('messageWall');
+                messageWall.innerHTML = '';
+                
+                if (this.messages.length === 0) {
+                    messageWall.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">暂无留言，快来发表第一条留言吧！</p>';
+                    return;
+                }
+                
+                // 按时间倒序排列
+                const sortedMessages = [...this.messages].sort((a, b) => new Date(b.time) - new Date(a.time));
+                
+                sortedMessages.forEach(message => {
+                    // 安全检查：确保消息数据完整
+                    if (!message || !message.nickname) {
+                        console.warn('发现无效的留言数据:', message);
+                        return; // 跳过无效数据
+                    }
+                    
+                    const messageCard = document.createElement('div');
+                    messageCard.className = 'message-card';
+                    
+                    // 格式化时间
+                    const messageTime = new Date(message.time);
+                    const timeString = this.formatTime(messageTime);
+                    
+                    // 检查是否为admin或founder用户
+                    const isAdminOrFounder = message.userId === 'admin' || message.userId === 'founder';
+                    
+                    // 安全地获取昵称首字母
+                    const nicknameFirstChar = message.nickname ? message.nickname.charAt(0) : '?';
+                    
+                    messageCard.innerHTML = `
+                        <div class="message-header">
+                            <div class="user-avatar">
+                                ${message.avatar ? 
+                                    `<img src="${message.avatar}" alt="用户头像">` : 
+                                    `<span>${nicknameFirstChar}</span>`
+                                }
+                            </div>
+                            <div class="user-info">
+                                <div class="user-name ${isAdminOrFounder ? 'gold-name' : ''}">
+                                    ${message.nickname || '未知用户'}
+                                    ${isAdminOrFounder ? 
+                                        `<span class="verified-badge gold-v"><i class="fas fa-crown"></i></span>` : 
+                                        ''
+                                    }
+                                </div>
+                                <div class="message-time">${timeString}</div>
+                            </div>
+                        </div>
+                        <div class="message-content">
+                            ${message.content || '无内容'}
+                        </div>
+                        <div class="message-actions">
+                            <button class="action-btn">
+                                <i class="far fa-heart"></i> ${message.likes || 0}
+                            </button>
+                            <button class="action-btn">
+                                <i class="far fa-comment"></i> 回复
+                            </button>
+                            <button class="action-btn report-btn" data-message-id="${message.id}">
+                                <i class="fas fa-flag"></i> 举报
+                            </button>
+                        </div>
+                    `;
+                    
+                    messageWall.appendChild(messageCard);
+                });
+                
+                // 为所有举报按钮绑定事件
+                document.querySelectorAll('.report-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const messageId = parseInt(e.currentTarget.getAttribute('data-message-id'));
+                        this.showReportModal(messageId);
+                    });
+                });
+            }
+
+            // 格式化时间
+            formatTime(date) {
+                const now = new Date();
+                const diff = now - date;
+                
+                // 小于1分钟
+                if (diff < 60000) {
+                    return '刚刚';
+                }
+                
+                // 小于1小时
+                if (diff < 3600000) {
+                    return `${Math.floor(diff / 60000)}分钟前`;
+                }
+                
+                // 小于1天
+                if (diff < 86400000) {
+                    return `${Math.floor(diff / 3600000)}小时前`;
+                }
+                
+                // 小于7天
+                if (diff < 604800000) {
+                    return `${Math.floor(diff / 86400000)}天前`;
+                }
+                
+                // 返回完整日期
+                return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            }
+
+            // 检查是否为管理员
+            isAdmin() {
+                return this.currentUser && (this.currentUser.username === 'admin' || this.currentUser.username === 'founder');
+            }
+
+            // 更新公告编辑权限
+            updateAnnouncementPermissions() {
+                const editAnnouncement = document.getElementById('editAnnouncement');
+                if (this.isAdmin()) {
+                    editAnnouncement.classList.remove('hidden');
+                } else {
+                    editAnnouncement.classList.add('hidden');
+                }
+            }
+
+            // 更新常见问题编辑权限
+            updateFaqPermissions() {
+                const editFaq = document.getElementById('editFaq');
+                if (this.isAdmin()) {
+                    editFaq.classList.remove('hidden');
+                } else {
+                    editFaq.classList.add('hidden');
+                }
+            }
+
+            // 头像上传处理
+            handleAvatarUpload(event, previewElement) {
+                const file = event.target.files[0];
+                if (file) {
+                    // 检查文件类型和大小
+                    if (!file.type.match('image.*')) {
+                        this.showNotification('请选择图片文件', 'error');
+                        return;
+                    }
+                    
+                    if (file.size > 5 * 1024 * 1024) { // 5MB限制
+                        this.showNotification('图片大小不能超过5MB', 'error');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewElement.innerHTML = `<img src="${e.target.result}" alt="头像">`;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // 处理注册
+            handleRegister(e) {
+                e.preventDefault();
+                
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                this.setButtonLoading(submitButton, true);
+                
+                const username = document.getElementById('regUsername').value;
+                const nickname = document.getElementById('regNickname').value;
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const avatarPreview = document.getElementById('avatarPreview');
+                const avatar = avatarPreview.querySelector('img') ? avatarPreview.querySelector('img').src : null;
+
+                // 表单验证
+                const errors = this.validateForm({
+                    username,
+                    nickname,
+                    password,
+                    confirmPassword
+                });
+                
+                if (Object.keys(errors).length > 0) {
+                    this.showFormErrors('registerForm', errors);
+                    this.setButtonLoading(submitButton, false);
+                    return;
+                }
+
+                // 检查用户名是否已存在
+                if (this.users.find(user => user.username === username)) {
+                    this.showNotification('用户名已存在！', 'error');
+                    this.setButtonLoading(submitButton, false);
+                    return;
+                }
+
+                const newUser = {
+                    username,
+                    nickname,
+                    password,
+                    avatar,
+                    joinDate: new Date().toISOString()
+                };
+
+                this.users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(this.users));
+
+                // 模拟网络延迟
+                setTimeout(() => {
+                    this.showNotification('注册成功！');
+                    this.setButtonLoading(submitButton, false);
+                    this.showPage(null, 'login-page');
+                    
+                    // 清空表单
+                    e.target.reset();
+                    avatarPreview.innerHTML = '<i class="fas fa-user"></i>';
+                }, 1000);
+            }
+
+            // 处理登录
+            handleLogin(e) {
+                e.preventDefault();
+                
+                const submitButton = e.target.querySelector('button[type="submit"]');
+                this.setButtonLoading(submitButton, true);
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // 表单验证
+                const errors = this.validateForm({
+                    username,
+                    password
+                });
+                
+                if (Object.keys(errors).length > 0) {
+                    this.showFormErrors('loginForm', errors);
+                    this.setButtonLoading(submitButton, false);
+                    return;
+                }
+
+                const user = this.users.find(u => u.username === username && u.password === password);
+                
+                // 模拟网络延迟
+                setTimeout(() => {
+                    if (user) {
+                        this.currentUser = user;
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        
+                        this.updateNavigation();
+                        this.showPage(null, 'main-website');
+                        
+                        this.showNotification(`欢迎回来，${user.nickname}！`);
+                        
+                        // 更新公告权限
+                        this.updateAnnouncementPermissions();
+                        this.updateFaqPermissions();
+                        
+                        // 显示公告
+                        setTimeout(() => {
+                            this.showAnnouncementModal();
+                        }, 500);
+                    } else {
+                        this.showNotification('用户名或密码错误！', 'error');
+                    }
+                    this.setButtonLoading(submitButton, false);
+                }, 1000);
+            }
+
+            // 更新导航栏
+            updateNavigation() {
+                const userAvatarNav = document.getElementById('userAvatarNav');
+                if (this.currentUser.avatar) {
+                    userAvatarNav.innerHTML = `<img src="${this.currentUser.avatar}" alt="用户头像">`;
+                } else {
+                    userAvatarNav.innerHTML = `<span>${this.currentUser.nickname.charAt(0)}</span>`;
+                }
+            }
+
+            // 游客登录
+            guestLogin() {
+                // 设置游客模式
+                this.isGuestMode = true;
+                
+                // 创建游客用户对象
+                this.currentUser = {
+                    username: 'guest',
+                    nickname: '游客',
+                    isGuest: true
+                };
+                
+                // 显示主网站
+                this.showPage(null, 'main-website');
+                
+                // 显示游客模式提示
+                document.getElementById('guestNotice').style.display = 'block';
+                
+                // 隐藏留言输入框
+                document.getElementById('messageInput').style.display = 'none';
+                
+                // 隐藏导航栏头像（禁用个人资料功能）
+                document.getElementById('userAvatarNav').style.display = 'none';
+                
+                // 渲染留言
+                this.renderMessages();
+                
+                this.showNotification('已进入游客模式，部分功能受限', 'warning');
+                
+                // 更新公告权限
+                this.updateAnnouncementPermissions();
+                this.updateFaqPermissions();
+                
+                // 显示公告
+                setTimeout(() => {
+                    this.showAnnouncementModal();
+                }, 500);
+            }
+
+            // 处理社交链接
+            handleSocialLinks(e) {
+                // 检查是否是社交链接
+                if (e.target.closest('.social-link')) {
+                    // 如果是游客模式，阻止默认行为并显示提示
+                    if (this.isGuestMode) {
+                        e.preventDefault();
+                        document.getElementById('restrictedModal').style.display = 'flex';
+                    }
+                }
+            }
+
+            // 关闭限制提示
+            closeRestrictedModal() {
+                document.getElementById('restrictedModal').style.display = 'none';
+            }
+
+            // 从限制提示切换到登录
+            loginFromRestrictedModal() {
+                document.getElementById('restrictedModal').style.display = 'none';
+                this.showPage(null, 'login-page');
+            }
+
+            // 显示个人资料
+            showProfile() {
+                if (this.currentUser && !this.isGuestMode) {
+                    document.getElementById('profileNickname').value = this.currentUser.nickname;
+                    document.getElementById('profileUsername').value = this.currentUser.username;
+                    
+                    const profileAvatar = document.getElementById('profileAvatar');
+                    if (this.currentUser.avatar) {
+                        profileAvatar.innerHTML = `<img src="${this.currentUser.avatar}" alt="用户头像">`;
+                    } else {
+                        profileAvatar.innerHTML = `<i class="fas fa-user"></i>`;
+                    }
+                    
+                    document.getElementById('profileModal').style.display = 'flex';
+                } else if (this.isGuestMode) {
+                    this.showNotification('游客模式下无法访问个人资料', 'warning');
+                }
+            }
+
+            // 隐藏个人资料
+            hideProfile() {
+                document.getElementById('profileModal').style.display = 'none';
+            }
+
+            // 处理个人资料更新
+            handleProfileUpdate(e) {
+                e.preventDefault();
+                
+                const newNickname = document.getElementById('profileNickname').value;
+                const newPassword = document.getElementById('profilePassword').value;
+                const confirmPassword = document.getElementById('profileConfirmPassword').value;
+                const profileAvatar = document.getElementById('profileAvatar');
+                const newAvatar = profileAvatar.querySelector('img') ? profileAvatar.querySelector('img').src : this.currentUser.avatar;
+
+                // 表单验证
+                const errors = this.validateForm({
+                    nickname: newNickname,
+                    password: newPassword,
+                    confirmPassword
+                });
+                
+                if (Object.keys(errors).length > 0) {
+                    this.showFormErrors('profileForm', errors);
+                    return;
+                }
+
+                // 更新用户数据
+                this.currentUser.nickname = newNickname;
+                if (newPassword) {
+                    this.currentUser.password = newPassword;
+                }
+                this.currentUser.avatar = newAvatar;
+
+                // 更新用户列表
+                const userIndex = this.users.findIndex(u => u.username === this.currentUser.username);
+                if (userIndex !== -1) {
+                    this.users[userIndex] = this.currentUser;
+                    localStorage.setItem('users', JSON.stringify(this.users));
+                    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                }
+
+                // 更新导航栏头像
+                this.updateNavigation();
+
+                this.showNotification('资料更新成功！');
+                this.hideProfile();
+            }
+
+            // 确认退出登录
+            confirmLogout() {
+                document.getElementById('logoutConfirmModal').style.display = 'flex';
+            }
+
+            // 退出登录
+            logout() {
+                // 清除当前用户
+                this.currentUser = null;
+                localStorage.removeItem('currentUser');
+                
+                // 隐藏主网站和模态框
+                this.showPage(null, 'login-page');
+                document.getElementById('profileModal').style.display = 'none';
+                document.getElementById('logoutConfirmModal').style.display = 'none';
+                
+                this.showNotification('已成功退出登录');
+            }
+
+            // 取消退出登录
+            cancelLogout() {
+                document.getElementById('logoutConfirmModal').style.display = 'none';
+            }
+
+            // 发布留言
+            submitMessage() {
+                if (!this.currentUser) {
+                    this.showNotification('请先登录后再留言', 'error');
+                    return;
+                }
+                
+                if (this.isGuestMode) {
+                    this.showNotification('游客模式下无法留言', 'warning');
+                    return;
+                }
+                
+                const messageText = document.getElementById('messageText');
+                const content = messageText.value.trim();
+                if (!content) {
+                    this.showNotification('请输入留言内容', 'error');
+                    return;
+                }
+                
+                const newMessage = {
+                    id: Date.now(),
+                    userId: this.currentUser.username,
+                    nickname: this.currentUser.nickname,
+                    avatar: this.currentUser.avatar,
+                    content: content,
+                    time: new Date().toISOString(),
+                    likes: 0
+                };
+                
+                this.messages.push(newMessage);
+                localStorage.setItem('messages', JSON.stringify(this.messages));
+                
+                // 清空输入框
+                messageText.value = '';
+                
+                // 重新渲染留言
+                this.renderMessages();
+                
+                this.showNotification('留言发布成功！');
+            }
+
+            // 显示举报模态框
+            showReportModal(messageId) {
+                this.reportingMessageId = messageId;
+                document.getElementById('reportModal').style.display = 'flex';
+            }
+
+            // 隐藏举报模态框
+            hideReportModal() {
+                document.getElementById('reportModal').style.display = 'none';
+                this.reportingMessageId = null;
+                // 清空表单
+                document.getElementById('reportForm').reset();
+            }
+
+            // 提交举报
+            submitReport() {
+                const reportType = document.getElementById('reportType').value;
+                const reportDescription = document.getElementById('reportDescription').value.trim();
+                
+                // 检查是否至少填写了一项
+                if (!reportType && !reportDescription) {
+                    this.showNotification('请至少填写一项举报信息', 'error');
+                    return;
+                }
+                
+                // 查找要举报的留言
+                const messageIndex = this.messages.findIndex(msg => msg.id === this.reportingMessageId);
+                
+                if (messageIndex === -1) {
+                    this.showNotification('留言不存在', 'error');
+                    this.hideReportModal();
+                    return;
+                }
+                
+                const reportedMessage = this.messages[messageIndex];
+                
+                // 检查是否为admin或founder用户的留言
+                if (reportedMessage.userId === 'admin' || reportedMessage.userId === 'founder') {
+                    // 修改为显示"举报成功"
+                    this.showNotification('举报成功', 'success');
+                    this.hideReportModal();
+                    return;
+                }
+                
+                // 删除留言
+                this.messages.splice(messageIndex, 1);
+                localStorage.setItem('messages', JSON.stringify(this.messages));
+                
+                // 重新渲染留言墙
+                this.renderMessages();
+                
+                // 显示成功消息
+                this.showNotification('举报成功，留言已被删除', 'success');
+                
+                // 隐藏模态框
+                this.hideReportModal();
+            }
+
+            // 显示公告
+            showAnnouncementModal() {
+                document.getElementById('announcementText').textContent = this.announcement;
+                this.updateAnnouncementPermissions();
+                document.getElementById('announcementModal').style.display = 'flex';
+            }
+
+            // 隐藏公告
+            hideAnnouncementModal() {
+                document.getElementById('announcementModal').style.display = 'none';
+                // 退出编辑模式
+                this.exitEditMode();
+            }
+
+            // 进入编辑模式
+            enterEditMode() {
+                const announcementText = document.getElementById('announcementText');
+                announcementText.contentEditable = true;
+                announcementText.classList.add('editable');
+                document.getElementById('editAnnouncement').classList.add('hidden');
+                document.getElementById('saveAnnouncement').classList.remove('hidden');
+                document.getElementById('cancelEdit').classList.remove('hidden');
+                document.getElementById('confirmAnnouncement').style.display = 'none';
+            }
+
+            // 退出编辑模式
+            exitEditMode() {
+                const announcementText = document.getElementById('announcementText');
+                announcementText.contentEditable = false;
+                announcementText.classList.remove('editable');
+                document.getElementById('editAnnouncement').classList.remove('hidden');
+                document.getElementById('saveAnnouncement').classList.add('hidden');
+                document.getElementById('cancelEdit').classList.add('hidden');
+                document.getElementById('confirmAnnouncement').style.display = 'block';
+                // 恢复原始公告内容
+                announcementText.textContent = this.announcement;
+            }
+
+            // 保存公告
+            saveAnnouncementContent() {
+                const announcementText = document.getElementById('announcementText');
+                const newAnnouncement = announcementText.textContent.trim();
+                if (newAnnouncement) {
+                    this.announcement = newAnnouncement;
+                    localStorage.setItem('announcement', this.announcement);
+                    this.showNotification('公告已更新！');
+                    this.exitEditMode();
+                } else {
+                    this.showNotification('公告内容不能为空', 'error');
+                }
+            }
+
+            // 渲染常见问题
+            renderFaq() {
+                const faqList = document.getElementById('faqList');
+                faqList.innerHTML = '';
+                
+                this.faqData.forEach((faq, index) => {
+                    const faqItem = document.createElement('li');
+                    faqItem.className = 'faq-item';
+                    faqItem.innerHTML = `
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <span>${faq.question}</span>
+                        </div>
+                        <div class="faq-answer">${faq.answer}</div>
+                    `;
+                    faqList.appendChild(faqItem);
+                });
+            }
+
+            // 显示常见问题弹窗
+            showFaqModal() {
+                this.renderFaq();
+                this.updateFaqPermissions();
+                document.getElementById('faqModal').style.display = 'flex';
+            }
+
+            // 隐藏常见问题弹窗
+            hideFaqModal() {
+                document.getElementById('faqModal').style.display = 'none';
+                // 退出编辑模式
+                this.exitFaqEditMode();
+            }
+
+            // 进入常见问题编辑模式
+            enterFaqEditMode() {
+                // 将每个答案变为可编辑
+                const answers = document.querySelectorAll('.faq-answer');
+                answers.forEach((answer, index) => {
+                    answer.contentEditable = true;
+                    answer.classList.add('editable');
+                });
+                
+                document.getElementById('editFaq').classList.add('hidden');
+                document.getElementById('saveFaq').classList.remove('hidden');
+                document.getElementById('cancelFaqEdit').classList.remove('hidden');
+            }
+
+            // 退出常见问题编辑模式
+            exitFaqEditMode() {
+                // 将每个答案恢复为不可编辑
+                const answers = document.querySelectorAll('.faq-answer');
+                answers.forEach((answer, index) => {
+                    answer.contentEditable = false;
+                    answer.classList.remove('editable');
+                });
+                
+                document.getElementById('editFaq').classList.remove('hidden');
+                document.getElementById('saveFaq').classList.add('hidden');
+                document.getElementById('cancelFaqEdit').classList.add('hidden');
+                
+                // 恢复原始常见问题内容
+                this.renderFaq();
+            }
+
+            // 保存常见问题
+            saveFaqContent() {
+                const answers = document.querySelectorAll('.faq-answer');
+                let hasEmptyAnswer = false;
+                
+                answers.forEach((answer, index) => {
+                    const content = answer.textContent.trim();
+                    if (!content) {
+                        hasEmptyAnswer = true;
+                        return;
+                    }
+                    this.faqData[index].answer = content;
+                });
+                
+                if (hasEmptyAnswer) {
+                    this.showNotification('所有问题的答案都不能为空', 'error');
+                    return;
+                }
+                
+                localStorage.setItem('faqData', JSON.stringify(this.faqData));
+                this.showNotification('常见问题已更新！');
+                this.exitFaqEditMode();
+            }
+
+            // 显示关于我们模态框
+            showAboutModal() {
+                document.getElementById('aboutModal').style.display = 'flex';
+            }
+
+            // 隐藏关于我们模态框
+            hideAboutModal() {
+                document.getElementById('aboutModal').style.display = 'none';
+            }
+
+            // 显示社区指南模态框
+            showCommunityGuidelinesModal() {
+                document.getElementById('communityGuidelinesModal').style.display = 'flex';
+            }
+
+            // 隐藏社区指南模态框
+            hideCommunityGuidelinesModal() {
+                document.getElementById('communityGuidelinesModal').style.display = 'none';
+            }
+
+            // 显示帮助中心模态框
+            showHelpCenterModal() {
+                document.getElementById('helpCenterModal').style.display = 'flex';
+            }
+
+            // 隐藏帮助中心模态框
+            hideHelpCenterModal() {
+                document.getElementById('helpCenterModal').style.display = 'none';
+            }
+
+            // 联系客服
+            contactSupport() {
+                this.showNotification('在线客服功能某些原因无法上线（没钱）', 'info');
+            }
+
+            // 滚动到页面顶部
+            scrollToTop() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+
+            // 滚动到页面底部
+            scrollToBottom() {
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+
+            // 处理模态框点击外部关闭
+            handleModalClicks(e) {
+                if (e.target === document.getElementById('profileModal')) {
+                    this.hideProfile();
+                }
+                if (e.target === document.getElementById('logoutConfirmModal')) {
+                    document.getElementById('logoutConfirmModal').style.display = 'none';
+                }
+                if (e.target === document.getElementById('restrictedModal')) {
+                    this.closeRestrictedModal();
+                }
+                if (e.target === document.getElementById('announcementModal')) {
+                    this.hideAnnouncementModal();
+                }
+                if (e.target === document.getElementById('faqModal')) {
+                    this.hideFaqModal();
+                }
+                if (e.target === document.getElementById('aboutModal')) {
+                    this.hideAboutModal();
+                }
+                if (e.target === document.getElementById('communityGuidelinesModal')) {
+                    this.hideCommunityGuidelinesModal();
+                }
+                if (e.target === document.getElementById('helpCenterModal')) {
+                    this.hideHelpCenterModal();
+                }
+                if (e.target === document.getElementById('reportModal')) {
+                    this.hideReportModal();
+                }
+            }
+
+            // 处理平滑滚动
+            handleSmoothScroll(e) {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            // 处理输入验证
+            handleInputValidation(e) {
+                const formGroup = e.target.closest('.form-group');
+                if (e.target.value.trim() === '') {
+                    formGroup.classList.add('error');
+                } else {
+                    formGroup.classList.remove('error');
+                    formGroup.classList.add('success');
+                }
+            }
+
+            // 初始化留言
+            initializeMessages() {
+                // 渲染留言
+                this.renderMessages();
+            }
+        }
+    </script>
+</body>
+</html>
