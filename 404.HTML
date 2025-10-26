@@ -1,86 +1,39 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>页面重定向 - 171L传媒</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            padding: 3rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            max-width: 500px;
-        }
-        h1 {
-            color: #e94560;
-            margin-bottom: 1rem;
-        }
-        p {
-            color: #b0b0b0;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #e94560;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+  <title>Redirecting...</title>
+  <script>
+    // 获取当前路径和查询参数
+    var path = window.location.pathname;
+    var search = window.location.search;
+    var hash = window.location.hash;
+    // 重定向到首页，并将当前路径作为参数传递（或者直接使用hash模式，这里根据你的路由方式决定）
+    // 由于我们的应用使用的是锚点（hash）路由，所以我们可以将路径和查询参数以及hash组合到hash中
+    // 但是注意，我们的应用目前使用的是锚点路由，所以非根路径的访问实际上应该通过hash来处理。
+    // 但是我们的应用目前没有使用history路由，所以这里我们考虑两种方式：
+
+    // 实际上，我们的应用内部路由都是通过锚点（#home, #about等）实现的，所以如果直接访问一个非根路径，比如 /#about，那么服务器收到的请求是根路径，所以不会触发404。
+    // 但是，如果用户直接访问了一个不带锚点的路径，比如 /about，那么服务器会返回404。
+
+    // 因此，我们需要将不带锚点的路径转换为带锚点的路径。
+
+    // 但是，我们的应用目前没有使用history.pushState，所以这里我们简单地将路径去掉第一个'/'然后作为锚点。
+    // 例如，/about 转换为 #about
+    // 注意：我们的应用锚点是以#开头的，所以需要转换。
+
+    // 如果当前路径不是根路径，且没有锚点，那么我们就将路径转换为锚点。
+    if (path !== '/') {
+      // 去掉开头的斜杠，然后设置为hash
+      window.location.hash = path.substring(1) + (search ? '?' + search : '') + (hash ? hash : '');
+      // 然后重定向到首页
+      window.location.href = '/';
+    } else {
+      // 如果已经是根路径，那么直接跳转到首页（可能会带有hash，所以不需要处理）
+      window.location.href = '/';
+    }
+  </script>
 </head>
 <body>
-    <div class="container">
-        <h1>⏳ 正在重定向...</h1>
-        <p>您访问的页面不存在，正在为您跳转到首页。</p>
-        <div class="loading"></div>
-    </div>
-
-    <script>
-        // 获取当前路径信息
-        const path = window.location.pathname;
-        const search = window.location.search;
-        const hash = window.location.hash;
-        
-        // 构建重定向URL
-        let redirectPath = '/';
-        
-        // 如果路径不是根路径，将其作为哈希参数传递
-        if (path && path !== '/' && path !== '/index.html') {
-            // 移除开头的斜杠并编码
-            const cleanPath = path.substring(1);
-            redirectPath = `/#${encodeURIComponent(cleanPath)}`;
-        }
-        
-        // 添加查询参数和哈希
-        redirectPath += search + hash;
-        
-        console.log('原始路径:', path);
-        console.log('重定向到:', redirectPath);
-        
-        // 延迟重定向，让用户看到提示信息
-        setTimeout(() => {
-            window.location.href = redirectPath;
-        }, 1500);
-    </script>
+  <p>Redirecting...</p>
 </body>
 </html>
