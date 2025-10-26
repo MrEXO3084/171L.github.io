@@ -1,20 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <title>页面重定向</title>
-    <script>
-        // 获取当前路径信息
-        var path = window.location.pathname;
-        var search = window.location.search;
-        var hash = window.location.hash;
-        
-        // 重定向到首页并保留路径信息
-        var newUrl = '/index.html' + (path !== '/' && path !== '/index.html' ? '#' + path.substring(1) : '') + search + hash;
-        window.location.replace(newUrl);
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面重定向 - 171L传媒</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 3rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            max-width: 500px;
+        }
+        h1 {
+            color: #e94560;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #b0b0b0;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #e94560;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <p>正在重定向到首页...</p>
+    <div class="container">
+        <h1>⏳ 正在重定向...</h1>
+        <p>您访问的页面不存在，正在为您跳转到首页。</p>
+        <div class="loading"></div>
+    </div>
+
+    <script>
+        // 获取当前路径信息
+        const path = window.location.pathname;
+        const search = window.location.search;
+        const hash = window.location.hash;
+        
+        // 构建重定向URL
+        let redirectPath = '/';
+        
+        // 如果路径不是根路径，将其作为哈希参数传递
+        if (path && path !== '/' && path !== '/index.html') {
+            // 移除开头的斜杠并编码
+            const cleanPath = path.substring(1);
+            redirectPath = `/#${encodeURIComponent(cleanPath)}`;
+        }
+        
+        // 添加查询参数和哈希
+        redirectPath += search + hash;
+        
+        console.log('原始路径:', path);
+        console.log('重定向到:', redirectPath);
+        
+        // 延迟重定向，让用户看到提示信息
+        setTimeout(() => {
+            window.location.href = redirectPath;
+        }, 1500);
+    </script>
 </body>
 </html>
